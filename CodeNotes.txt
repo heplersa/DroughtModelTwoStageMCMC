@@ -1,0 +1,7 @@
+First, need to download USDMDataAvg.csv from Data Dryad doi:10.5061/dryad.g1jwstqw7
+
+Next, run MCMCstage1.R as an array job; where the number of elements in the array is Q=1198 for the number of unique grid cells. This outputs a separate Rda file for every grid cell; saved in a folder 'StageOneOutput' and named MCMCout.q.Rda; where q=grid cell index.
+
+Next, run MCMCstage2.R. This first consolidates all of the stage 1 output files and organized as matrices and arrays to be used in the second-stage algorithm. Then it runs the second stage MCMC algorithm and saves output in Stage2Output.Rda file. 
+
+
