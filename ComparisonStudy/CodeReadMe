@@ -1,4 +1,4 @@
-First, need to download USDMDataAvg.csv from Data Dryad doi:10.5061/dryad.g1jwstqw7
+First, need to download USDMDataAvg.csv from Data Dryad https://doi.org/10.5061/dryad.g1jwstqw7
 
 ###############################################################################################
 To run the proposed two-stage MCMC algorithm, do the following: 
