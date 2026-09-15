@@ -1,1 +1,1 @@
-This repository contains all code files needed to run both the comparison study and full data application from the paper "Recursive MCMC for Fast Bayesian Inference of Large Spatio-temporal Ordinal Data, with Application to US Drought" by Staci Hepler and Robert Erhardt.
+This repository contains all code files needed to run both the comparison study and full data application from the paper "Two-Stage MCMC for Fast Bayesian Inference of Large Spatio-temporal Ordinal Data, with Application to US Drought" by Staci Hepler and Robert Erhardt.
