@@ -8,14 +8,15 @@ data = read.csv('USDMData.csv')
 scalingvalues = read.csv('scalingvalues.csv')
 data = data[-which(data$grid %in% c("N78","W98","GG14","WW88")),] ### remove these 4 locations whose drought level never changes because they are over water
 data = data[which(data$time>20110101),]
-
 training <- data[which(data$time<20220400),] ### data to model
 
 training$timeID = as.numeric(as.factor(training$time))
 gridID = training$grid[which(training$timeID==1)]
 
-Q = length(gridID)
-Tobs = nrow(training)/Q
+All = length(gridID) ## scientific runs for all locations
+Tobs = nrow(training)/All
+## Q = length(list.files("StageOneOutput")) ## For testing a subset
+Q = All ## uncomment when fitting model to all locations instead.
 
 #############################################################
 ####### Create the design matrix
@@ -53,17 +54,14 @@ rm("Ypred.out")
 
 ### add back in the deterministic mean trend that was removed
 ### the coefficients of the deterministic model are saved in ols list 
-data <- read.csv("USDMData.csv") #### these csv files were generated when previously running ScalingValues.R.
 sub <- data
-drop = which(sub$grid %in% c("N78","W98","GG14","WW88"))
-sub <- sub[-drop,]
 rm(data)
 
-## only keep data from July 1, 2003 - 2012
 sub <- sub[sub$time < 20220630,]
 sub <- sub[sub$time > 20110101,]
 
-I = length(unique(sub$grid))
+## I = length(list.files("StageOneOutput")) ## For testing a subset
+I = 3254 ## all locations
 Tpred = 13
 T = length(unique(sub$time))-Tpred
 
@@ -101,13 +99,26 @@ for(i in 1:M){
 ###### load in samples from drought model output 
 
 ######### load drought model output
-load('Stage2Output.Rda')
+load('StageTwoOutput.Rda')
 
-#### note that M=1000 in covariate output but dim of the drought model output is 5000 -- thin by 5 to be aligned
-beta.out = beta.out[,,seq(1,5000,by=5)]
-rho.Z.out = rho.Z.out[,seq(1,5000,by=5)]
-Z.out = Z.out[,seq(1,5000,by=5)] ### samples for the very last observed time period Z
-sigma.sq.out = sigma.sq.out[,seq(1,5000,by=5)]
+#### Check alignment of the covariate and drought output based on the length of the two chains.
+#### only keep a subset of particles from the longer chain.  
+M.drought = dim(beta.out)[3]
+if (M.drought < M) {
+  keep <- round(M.drought * seq(0,1,by=1/M),0)
+  beta.out = beta.out[,,keep]
+  rho.Z.out = rho.Z.out[,keep]
+  Z.out = Z.out[,keep] ### samples for the very last observed time period Z
+  sigma.sq.out = sigma.sq.out[,keep]
+}
+if (M.drought > M) {
+  keep <- round(M.drought * seq(0,1,by=1/M),0)
+  beta.out = beta.out[,,keep]
+  rho.Z.out = rho.Z.out[,keep]
+  Z.out = Z.out[,keep] ### samples for the very last observed time period Z
+  sigma.sq.out = sigma.sq.out[,keep]
+}
+
 
 
 #### for each posterior sample of (theta, Xpred), generate Z.pred then generate Y.pred
@@ -131,7 +142,6 @@ for(m in 1:M){
   print(paste(m))
   
 }
-
 
 save(Z.pred,Y.pred,Xpred,file="ForecastOutput.Rda")
 

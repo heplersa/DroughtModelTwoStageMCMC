@@ -5,12 +5,12 @@
 #################################################################
 ##### First, process the data and get means, SDs of covariates
 
-source('ScalingValues.R') #### this script loads in the data, transforms some of the covariates, and computes the means and SDs of covariates
+###### load data.  these csv files were generated when previously running ScalingValues.R.
+data <- read.csv("USDMData.csv")
+scalingvalues <- read.csv("scalingvalues.csv", row.names=1)
 
 data = data[-which(data$grid %in% c("N78","W98","GG14","WW88")),] ### remove these 4 locations whose drought level never changes because they are over water
-
 data = data[which(data$time>20110101),]
-
 training <- data[which(data$time<20220400),] ### data to model
 
 training$timeID = as.numeric(as.factor(training$time))
@@ -44,13 +44,12 @@ yfull = as.numeric(training$droughtID)-1
 
 rm('select','Xcov','training','holdout','scalingvalues')
 
-
 #####################################################
 
 #### now can do MCMC for grid cell q
 #### run as an array job so MCMC for each q in parallel
 
-args = Sys.getenv('SLURM_ARRAY_TASK_ID')
+args = Sys.getenv('SLURM_ARRAY_TASK_ID') ## comment out and set q to test
 q = as.numeric(args[1])
 
 II = seq(q,(Q*Tobs),by=Q)
@@ -78,16 +77,19 @@ if(is.na(sum(beta))){
 bp = length(beta)
 
 #### Set up MCMC
-M.iter = 100000
-M.burn = 20000
-M.thin = 8
+
+M.iter = 1000 ## Scientific runs
+M.burn = 200
+M.thin = 10 
+
+## M.iter = 100000 ## Scientific runs
+## M.burn = 20000
+## M.thin = 10 
 
 library(nimble)
 library(coda)
 
-
 st <- Sys.time()
-
 
 mod_data=list(Y=Y, X=X)
 mod_constants=list(Tobs=Tobs, bp=bp, cut=c(0,1,2,3,4))
@@ -159,6 +161,14 @@ tl = which(colnames(samples)=="tau.z")
 
 MCMCout <- list("Z"=samples[,zl:zu],"sigma.sq"=1/samples[,tl],"beta"=samples[,bl:bu],"rho.Z"=samples[,rl])
 
+
+## Extract the folder path from the file path
+folder_path <- "StageOneOutput"
+
+# 2. Create the folder (and any missing parent folders) if it doesn't exist
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path, recursive = TRUE)
+}
 
 save(MCMCout,time.out, file=paste("StageOneOutput/MCMCout.",q,".Rda",sep=""))
 

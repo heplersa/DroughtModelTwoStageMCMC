@@ -9,8 +9,9 @@ substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
 }
 
-## Load all of the individual files and consolidate into array
-I = 3254
+## I <- length(list.files("StageOneCovariateOut")) ## For testing a subset
+I = 3254 ## Uses all locations, if all were run in Stage One in the array job.
+
 names = paste0("StageOneCovariateOut/CovariateOut",1:I, ".Rda")
 StageOne = list()
 
@@ -88,9 +89,15 @@ Ypred = Ypred.samp[,,,M]
 tausq.gamma = rep(1,J)
 
 ##### store all final draws
-M.iter = 10000
-M.burn = 5000
-M.thin = 5
+
+M.iter = 1000 ## Testing
+M.burn = 500 ## Testing
+M.thin = 10 ## Testing
+
+## M.iter = 10000 ## For scientific run
+## M.burn = 5000 ## For scientific run
+## M.thin = 10 ## For scientific run
+
 M.out = (M.iter-M.burn)/M.thin
 
 sigma.inv.out = array(NA,c(I,J*J,M.out))

@@ -4,13 +4,21 @@
 
 set.seed(810) ## Why not...
 
-###### will run as an array job; run grid cell K in parallel
+###### Run as an array job; run grid cell K in parallel
 args = Sys.getenv('SLURM_ARRAY_TASK_ID')
 K = as.numeric(args[1])
 outfile = paste0("StageOneCovariateOut/CovariateOut",K,".Rda")
 
-###### load data
-data <- read.csv("USDMData.csv") #### these csv files were generated when previously running ScalingValues.R.
+## Extract the folder path from the file path
+folder_path <- dirname(outfile)
+
+# 2. Create the folder (and any missing parent folders) if it doesn't exist
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path, recursive = TRUE)
+}
+
+###### load data.  These csv files were generated when previously running ScalingValues.R.
+data <- read.csv("USDMData.csv")
 scalingvalues <- read.csv("scalingvalues.csv")
 
 
@@ -154,7 +162,9 @@ for (j in 1:J){
 nimble_mcmc<-buildMCMC(mcmc_conf)
 compiled_mcmc<-compileNimble(nimble_mcmc, project = nimble_model,resetFunctions = TRUE)
 
-MCS=10000
+MCS=100 ## To test code only.  Longer for a scientific run.
+## MCS=10000 ## Scientific run
+
 samples_sub=runMCMC(compiled_mcmc,inits=mod_inits,
                     nchains = 1, nburnin=MCS/2,niter = MCS,samplesAsCodaMCMC = TRUE,thin=5,
                     summary = FALSE, WAIC = FALSE, progressBar=TRUE)

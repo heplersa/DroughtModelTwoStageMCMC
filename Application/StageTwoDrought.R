@@ -11,6 +11,7 @@ st <- Sys.time()
 
 load(paste('StageOneOutput/MCMCout.',1,'.Rda',sep=""))
 
+## n = length(list.files("StageOneOutput")) ## For testing a subset
 n = 3254
 T = ncol(MCMCout$Z)
 M = nrow(MCMCout$Z)
@@ -26,7 +27,7 @@ for(q in 1:n){
 
 	load(paste('StageOneOutput/MCMCout.',q,'.Rda',sep=""))
 
-	 Z.samp[q,,] = t(MCMCout$Z)
+	Z.samp[q,,] = t(MCMCout$Z)
   sigma.sq.samp[q,]=MCMCout$sigma.sq
   beta.samp[q,,]=t(MCMCout$beta)
   rho.Z.samp[q,]=MCMCout$rho.Z
@@ -57,14 +58,13 @@ tausq.b = rep(1,bp)
 tausq.g = 1
 
 ##### need adjacency matrix for grid cells and number of neighbors of each...
-##### need adjacency matrix for grid cells and number of neighbors of each...
-
-data <- read.csv("USDMDataAvg.csv")
+data <- read.csv("USDMData.csv")
 data <- data[,-1] ## remove leading column
 data = data[-which(data$grid %in% c("N78","W98","GG14","WW88")),] ### remove these 4 locations whose drought level never changes because they are over water
 
+## Reads in locations from the test set
+loc = data[which(data$time==data$time[1]),c("lon","lat")][1:n,]
 
-loc = data[which(data$time==data$time[1]),c("lon","lat")]
 rm('data')
 D = as.matrix(dist(loc))
 A = 1*(D>0 & D<=sqrt(.5)) ### regular grid; queens adjacency means distances is <= sqrt(0.5)
@@ -73,10 +73,14 @@ D = matrix(0,n,n)
 diag(D)=numnns
 
 
+M.iter = 1000 ## Testing
+M.burn = 500 ## Testing
+M.thin = 10 ## Testing
 
-M.iter = 55000
-M.burn = 5000
-M.thin=10
+## M.iter = 55000
+## M.burn = 5000
+## M.thin = 10
+## Will produce 5000 draws in drought
 M.out = (M.iter-M.burn)/M.thin
 
 ##### create storage matrices
@@ -137,4 +141,4 @@ for(m in 1:M.iter){
 close(progress_bar)
 time.out <- Sys.time()-st
 
-save(Z.out,sigma.sq.out,beta.out,rho.Z.out,tausq.b.out,tausq.g.out,time.out,file="Stage2Output.Rda")
+save(Z.out,sigma.sq.out,beta.out,rho.Z.out,tausq.b.out,tausq.g.out,time.out,file="StageTwoOutput.Rda")

@@ -14,9 +14,9 @@ mean(is.na(data$ssrun)) ## no missing
 ## snod, smom, smowc, weasd not worth re-expressing
 
 ## check VPD, make transformed.
-hist(data$vpd)
-data$vpd.tr = log(data$vpd + 1)
-hist(data$vpd.tr)
+## hist(data$vpd)
+## data$vpd.tr = log(data$vpd + 1)
+## hist(data$vpd.tr)
 
 ## Raising to (1/4) power seems like a reasonable addition
 data$apcp.tr = (data$apcp)^(1/4)
