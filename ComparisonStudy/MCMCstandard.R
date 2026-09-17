@@ -96,9 +96,14 @@ num<-as.vector(num)
 weights<-1+0*adj
 
 #### Set up MCMC
-M.iter = 45000
-M.burn = 20000
-M.thin = 5
+M.iter = 450 ## test code
+M.burn = 200 ## test code
+M.thin = 5 ## ## test code
+
+
+## M.iter = 45000 ## scientific results
+## M.burn = 20000 ## scientific results
+## M.thin = 5 ## scientific results
 
 mod_data=list(Y=Y, X=X)
 mod_constants=list(Tobs=Tobs, Q=Q, bp=bp, cut=c(0,1,2,3,4), adj=adj, num=num, weights=weights)

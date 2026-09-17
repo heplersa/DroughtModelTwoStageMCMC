@@ -21,7 +21,7 @@ rownames(scalingvalues) = colnames(data[6:ncol(data)])
 data = data[-which(data$grid %in% c("N78","W98","GG14","WW88")),] ### remove these 4 locations whose drought level never changes because they are over water
 
 #########################################################################################
-##### For comparison only use data from 2011 through March 2022 and west of -105 longitude
+##### For comparison only use data from 2020 through March 2022 and west of -105 longitude
 
 data = data[which(data$lon<(-105)),]
 data = data[which(data$time>20200000),]
@@ -98,9 +98,14 @@ if(is.na(sum(beta))){
 
 
 #### Set up MCMC
-M.iter = 100000
-M.burn = 20000
-M.thin = 8
+M.iter = 1000 ## test
+M.burn = 500 ## test
+M.thin = 10 ## test
+
+
+## M.iter = 100000 ## scientific runs
+## M.burn = 20000 ## scientific runs
+## M.thin = 8 ## scientific runs
 
 mod_data=list(Y=Y, X=X)
 mod_constants=list(Tobs=Tobs, bp=bp, cut=c(0,1,2,3,4))
@@ -166,7 +171,17 @@ tl = which(colnames(samples)=="tau.z")
 MCMCout <- list("Z"=samples[,zl:zu],"sigma.sq"=1/samples[,tl],"beta"=samples[,bl:bu],"rho.Z"=samples[,rl])
 
 #### save output for each stage one posterior in a folder indexed by site ID
-save(MCMCout,time.out, file=paste("StageOneOutput/MCMCout.",q,".Rda",sep=""))
+outfile = paste0("StageOneMCMC/MCMCout",q,".Rda")
+
+## Extract the folder path from the file path
+folder_path <- dirname(outfile)
+
+# 2. Create the folder (and any missing parent folders) if it doesn't exist
+if (!dir.exists(folder_path)) {
+  dir.create(folder_path, recursive = TRUE)
+}
+
+save(MCMCout, time.out, file=outfile)
 
 
 

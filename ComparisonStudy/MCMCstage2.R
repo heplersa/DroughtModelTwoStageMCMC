@@ -77,9 +77,13 @@ tausq.g = 1
 
 ##### store final draws
 
-M.iter = 45000
-M.burn = 20000
-M.thin = 5
+M.iter = 450 ## test
+M.burn = 200 ## test
+M.thin = 5 ## test
+
+## M.iter = 45000 ## scientific run
+## M.burn = 20000 ## scientific run
+## M.thin = 5 ## scientific run
 M.out = (M.iter-M.burn)/M.thin
 
 Z.out = array(NA,c(n,T,M.out))
