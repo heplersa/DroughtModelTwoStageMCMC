@@ -1,0 +1,63 @@
+This folder contains files to implement a *MINIMAL WORKING EXAMPLE* of the code used in the paper "Recursive MCMC for Fast Bayesian Inference of Large Spatio-temporal Ordinal Data, with Application to US Drought" by Staci Hepler and Robert Erhardt.
+This has removed all parallelization. As such, it is not recommended to use this code in practice. However, this allows a user to run the jobs locally for assessment of reproducibility
+
+## The data datasubset.csv is a subset of the USDMDataAvg.csv data downloaded from Data Dryad doi:10.5061/dryad.g1jwstqw7 used in the full analysis
+## See the CodeNotes in the Application folder for a more detailed description of the variables
+
+datasubset.csv only includes 80 locations with latitude between 33 and 38 degrees and between longitudes of -112 and -116 degrees
+It also only includes the weeks beginning with January 7, 2020
+
+## The user first needs to run the code file: ScalingValues.R
+
+INPUT: datasubset.csv
+OUTPUTS: creates data and scalingvalues R objects and also stores these in scalingvalues.csv files; 
+
+This script computes means and standard deviations of all covariates by grid cell, and outputs 
+scalingvalues.csv.  These are used to center and scale covariates to aid with mixing in MCMC, and also 
+used to back-transform output back to the original data scale.
+   
+#################################################################################################################
+Forecasting drought using this model requires fitting a model for the observed drought data (steps 1 & 2 below), fitting a model for the environmental covariates (steps 3 & 4 below), 
+then using the output from those models to sample from the posterior predictive distribution for future weeks (step 5 below). 
+
+### to fit the model for the observed drought data
+1) Run StageOneDrought.R 
+For this minimal working example, this uses a for loop to loop over all grid cells. Note that line 10 of the code reduces the data further to only model 10 locations. This is for computationally efficiency for 
+reproducing model code only. 
+
+INPUTS: datasubset.csv and scalingvalues.csv
+OUTPUT:  a separate Rda file for every grid cell; saved in a folder 'StageOneOutput' and named MCMCout.q.Rda; where q=grid cell index.
+
+2) Run StageTwoDrought.R. This first consolidates all of the stage 1 output files and organized as matrices and arrays to be used in the second-stage algorithm. 
+Then it runs the second stage MCMC algorithm and saves output in Stage2Output.Rda file. 
+INPUTS: MCMCout.q.Rda files from step (1) for each grid cell q
+OUTPUT: Stage2Output.Rda contains posterior samples
+
+#########################################################################################################################
+To forecast drought for the following 13 weeks, the covariate model must first be fit in order to generate forecasts of the covariates that are used as explanatory variables in the drought model
+
+### MCMC to fit the covariate model and forecast covariate values
+This model is fit in two stages.  Stage one fits location-specific models to each grid cell. For this minimal example, this is done in a for loop looping over all grid cells
+Stage two does the recursive proposal resampling to fit the spatial model.
+
+3) Run stage one of the two-stage MCMC algorithm:
+FILE: StageOneCovariate.R; #
+INPUT: datasubset.csv, scalingvalues.csv #these files were previously generated when running ScalingValues.R
+OUTPUT: CovariateOut[i].Rda, for i=1, ..., I.  These are R workspaces saving the MCMC output for the location-specific model fits. Output is saved in a folder called StageOneCovariateOut. 
+
+
+4) Run stage two of the two-stage MCMC algorithm:
+FILE: StageTwoCovariate.R
+INPUTS: CovariateOut[i].Rda, i = 1, ..., I.  These are the I location-specific model fits from stage one.
+OUTPUT: StageTwoCovariateOutput.Rda contains the MCMC output and also the trend that was subtracted from the environmental variables before model fitting; 
+note the sampled forecasted values of the environmental variables are objects in this output file called Ypred.out
+
+##############################################################
+
+### Forecast drought
+
+This file combines the output from steps (2) and (4) above in order to forecast drought for the following 13 weeks. 
+
+5) Run forecast.R to simulate from the posterior predictive distribution of drought in weeks T+1,...,T+13
+INPUTS: datasubset.csv and scalingvalues.csv to re-create design matrix X for observed time periods; StageTwoCovariateOutput.Rda to get samples from the posterior predictive distribution of the environmental covariates; Stage2Output.Rda to get posterior samples of the drought model
+OUTPUT: ForecastOutput.Rda contains samples from the posterior predictive distribution for the latent Z.pred and also the drought level Y.pred for the future Tpred=13 weeks
