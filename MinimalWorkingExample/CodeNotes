@@ -23,7 +23,7 @@ then using the output from those models to sample from the posterior predictive 
 ### to fit the model for the observed drought data
 1) Run StageOneDrought.R 
 For this minimal working example, this uses a for loop to loop over all grid cells. Note that line 10 of the code reduces the data further to only model 10 locations. This is for computationally efficiency for 
-reproducing model code only. 
+reproducing model code only. Code requires NIMBLE installation (https://r-nimble.org/download.html).
 
 INPUTS: datasubset.csv and scalingvalues.csv
 OUTPUT:  a separate Rda file for every grid cell; saved in a folder 'StageOneOutput' and named MCMCout.q.Rda; where q=grid cell index.
